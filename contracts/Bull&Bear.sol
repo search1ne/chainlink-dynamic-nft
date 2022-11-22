@@ -29,7 +29,7 @@ contract BullBear is
     
     uint256[] public s_randomWords;
     uint256 public s_requestId;
-    uint32 public callbackGasLimit = 600000; // set higher as fullfillRandomWords is doing a LOT of heavy lifting.
+    uint32 public callbackGasLimit = 1000000; // set higher as fullfillRandomWords is doing a LOT of heavy lifting.
     uint64 public s_subscriptionId;
     bytes32 keyhash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15; // keyhash for Goerli
 
@@ -68,13 +68,8 @@ contract BullBear is
         /* Set Keeper update interval */
         interval = updateInterval;
         lastTimeStamp = block.timestamp;
-        /*
-         * set the price feed address to BTC/USD Price Feed Contract Address on 
-         * Goerli: https://goerli.etherscan.io/address/
-         * 0xA39434A63A52E749F02807ae27335515BA4b07F7
-         * or the MockPriceFeed Contract
-         */
-        priceFeed = AggregatorV3Interface(_priceFeed); // To pass in the mock
+
+        priceFeed = AggregatorV3Interface(_priceFeed);
         /* set the price for the chosen currency pair */
         currentPrice = getLatestPrice();
         COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
@@ -152,7 +147,7 @@ contract BullBear is
             /*uint80 answeredInRound*/
         ) = priceFeed.latestRoundData();
         
-        return price;   // example price returned 3034715771688
+        return price;   // example price returned 111296000000
     }
 
     function requestRandomnessForNFTUris()
@@ -199,9 +194,7 @@ contract BullBear is
 
         
 
-    /*function called by performUpkeep to update nft using MockPriceFeed.sol*/
-
-    /*
+    /* Called by performUpkeep to update nft using MockPriceFeed.sol /*
     function updateAllTokenUris(string memory trend) 
         internal 
     {
@@ -220,6 +213,7 @@ contract BullBear is
 
     */
 
+    /* Start with 60. Raise to 500 after registering to Chainlink Automation to save LINK */
     function setInterval(uint256 newInterval) 
         public 
         onlyOwner 
@@ -227,6 +221,9 @@ contract BullBear is
         interval = newInterval;
     }
 
+    /* MockPriceFeed or Live Price Feed
+     * Goerli ETH/USD price feed contract: 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
+     */
     function setPriceFeed(address newFeed) 
         public 
         onlyOwner 
@@ -235,7 +232,7 @@ contract BullBear is
     }
 
 
-    // For VRF Subscription Manager
+    // For VRF Subscription Manager on https://vrf.chain.link 
     function setSubscriptionId(uint64 _id)
         public
         onlyOwner
@@ -250,6 +247,9 @@ contract BullBear is
         callbackGasLimit = maxGas;
     }
 
+    /* Goerli VRF Coordinator: 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D 
+     * Confirm contract address by calling COORDINATOR
+     */
     function setVRFCoordinator(address _address)
         public
         onlyOwner
@@ -260,20 +260,23 @@ contract BullBear is
 
 
     // Helpers
+    /*
     function compareStrings(string memory a, string memory b) 
         internal 
         pure 
         returns (bool) 
     {   
-        /* No longer used as not being called when using VRF, as we're not using enums. */
+        /* No longer used as not being called when using VRF, as we're not using enums. 
         return (keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b)));
     }
 
     function updateAllTokenUris(string memory trend)
         internal
     {
-        /* The logic from this has been moved up to fulfill random words. */
+        /* The logic from this has been moved up to fulfill random words. 
     }
+    */
+
 
     // The following functions are overrides required by Solidity.
 
